@@ -1,0 +1,10 @@
+1. Preprocessing
+	Alur sampai 
+	token = nltk.tokenize.word_tokenize(kronologi)
+	di pisah per d / kronologi
+2. tfidf
+	Alur sampai 
+	hitung = math.log(len(d_list)/kamus_kata[kata], 10)
+3. Naive Bayes
+	Rumus sudah ada.
+4. 

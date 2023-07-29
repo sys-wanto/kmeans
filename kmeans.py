@@ -3,9 +3,24 @@ from flask_cors import CORS
 
 from IPython.core.display import Math
 import math
+import re
+
+import nltk
+nltk.download('punkt')
 
 app = Flask(__name__)
 CORS(app)
+
+
+@app.route('/preprocessing', methods=['POST'])
+def preprocessing():
+  # 1
+    q = request.form.getlist('q[]')
+
+    d_string = (' ').join(q).lower()
+
+  # 2
+    d_string = re.sub(r"\d+", "", d_string)
 
 
 @app.route('/tfidf', methods=['POST'])
@@ -14,7 +29,7 @@ def index():
     # 1
     q = request.form.getlist('q[]')
 
-    d_string = (' ').join(q)
+    d_string = (' ').join(q).lower()
     # 2
     string_splited = d_string.split()
 

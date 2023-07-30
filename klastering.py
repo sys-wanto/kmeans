@@ -1,6 +1,11 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
+import string
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from nltk.tokenize import word_tokenize
+
 from IPython.core.display import Math
 import math
 import re
@@ -16,11 +21,42 @@ CORS(app)
 def preprocessing():
   # 1
     q = request.form.getlist('q[]')
+    qIndex = 0
+    qKey = {}
+    for kata in q:
+        kata = kata.lower()
+        kata = re.sub(r"\d+", "", kata)
+        kata = kata.translate(str.maketrans("", "", string.punctuation))
 
-    d_string = (' ').join(q).lower()
+        factory = StopWordRemoverFactory()
+        stopword = factory.create_stop_word_remover()
 
-  # 2
-    d_string = re.sub(r"\d+", "", d_string)
+        kata = stopword.remove(kata)
+
+        factory = StemmerFactory()
+        Stemmer = factory.create_stemmer()
+        kata = Stemmer.stem(kata)
+        kata = nltk.tokenize.word_tokenize(kata)
+
+        qKey[f'q{qIndex}'] = kata
+        qIndex += 1
+    hasil = []
+    kamus_kata = {}
+    for key in qKey:
+        kamus_kata_q = {}
+        for kata in qKey[key]:
+            kamus_kata_q[kata] = qKey[key].count(kata)
+            kamus_kata[key] = kamus_kata_q
+    hasil.append(kamus_kata)
+    hasil_akhir = {
+        'q': q,
+        'hasil': hasil[0]
+    }
+    return jsonify(
+        is_error=False,
+        data=hasil_akhir,
+        msg="sukses."
+    )
 
 
 @app.route('/tfidf', methods=['POST'])

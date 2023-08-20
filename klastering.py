@@ -16,6 +16,14 @@ nltk.download('punkt')
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/',methods=['GET'])
+def index():
+    return jsonify(
+        is_error=False,
+        data='',
+        msg="sukses."
+    )
+
 
 @app.route('/preprocessing', methods=['POST'])
 def preprocessing():
@@ -57,10 +65,20 @@ def preprocessing():
         data=hasil_akhir,
         msg="sukses."
     )
-
-
 @app.route('/tfidf', methods=['POST'])
-def index():
+def tfidf():
+    # 1
+    q = request.form.getlist('q[]')
+
+
+    return jsonify(
+        is_error=False,
+        data=hasil,
+        msg="sukses."
+    )
+
+@app.route('/tfidf-old', methods=['POST'])
+def tfidf_old():
 
     # 1
     q = request.form.getlist('q[]')
@@ -79,6 +97,22 @@ def index():
     data_list = []
     for kalimat in q:
         for kata in string_splited:
+            kata = kata.lower()
+            kata = re.sub(r"\d+", "", kata)
+            kata = kata.translate(str.maketrans("", "", string.punctuation))
+
+            factory = StopWordRemoverFactory()
+            stopword = factory.create_stop_word_remover()
+
+            kata = stopword.remove(kata)
+
+            factory = StemmerFactory()
+            Stemmer = factory.create_stemmer()
+            kata = Stemmer.stem(kata)
+            kata = nltk.tokenize.word_tokenize(kata)
+
+            
+
             data_dict[kata] = kalimat.count(kata)
             data_list.append(data_dict)
             data_dict = {}
@@ -110,4 +144,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
